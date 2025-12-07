@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 6. BACKGROUND FLOATING IMAGES LOGIC (FIXED) ---
     const bgContainer = document.getElementById('bgAnimation');
     
-    // The images you requested
     const bgImages = [
         'images/tungtungsahur.png',
         'images/tralalelotralala.png',
@@ -126,25 +125,20 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < count; i++) {
             const img = document.createElement('img');
             
-            // Randomly pick an image
             const randomImg = bgImages[Math.floor(Math.random() * bgImages.length)];
             img.src = randomImg;
             img.alt = "Floating Icon";
             img.classList.add('bg-icon');
             
-            // Random Start Position (Left: 0% to 95%)
             const randomLeft = Math.floor(Math.random() * 95);
             img.style.left = `${randomLeft}%`;
             
-            // Random Size (60px to 100px)
             const randomSize = Math.floor(Math.random() * 40) + 60;
             img.style.width = `${randomSize}px`;
 
-            // Random Animation Duration (10s to 25s) - Varying speeds
             const randomDuration = Math.floor(Math.random() * 15) + 10;
             img.style.animation = `floatUp ${randomDuration}s linear infinite`;
             
-            // Random Delay so they don't all start at once
             const randomDelay = Math.floor(Math.random() * 20);
             img.style.animationDelay = `-${randomDelay}s`; 
 
@@ -155,4 +149,88 @@ document.addEventListener('DOMContentLoaded', () => {
     if(bgContainer) {
         createFloatingImages();
     }
+
+    // =================================================
+    //  HELPER: DETEKSI WAKTU & ENVIRONMENT PENGGUNA
+    // =================================================
+    const pad = (n) => String(n).padStart(2, '0');
+
+    const getEnvironmentInfo = () => {
+        const ua = navigator.userAgent || '';
+        let deviceType = /Mobi|Android|iPhone|iPad/i.test(ua) ? 'Mobile' : 'Desktop/Laptop';
+
+        let os = 'Unknown';
+        if (/Windows NT/i.test(ua)) os = 'Windows';
+        else if (/Android/i.test(ua)) os = 'Android';
+        else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+        else if (/Mac OS X/i.test(ua)) os = 'macOS';
+        else if (/Linux/i.test(ua)) os = 'Linux';
+
+        let browser = 'Unknown';
+        if (/Edg\//.test(ua)) browser = 'Microsoft Edge';
+        else if (/OPR\/|Opera/i.test(ua)) browser = 'Opera';
+        else if (/Chrome\//.test(ua) && !/Edg\//.test(ua) && !/OPR\/|Opera/i.test(ua)) browser = 'Chrome';
+        else if (/Firefox\//.test(ua)) browser = 'Firefox';
+        else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser = 'Safari';
+
+        let app = 'Browser biasa';
+        if (/Instagram/i.test(ua)) app = 'Instagram In-App Browser';
+        else if (/FBAN|FBAV/i.test(ua)) app = 'Facebook In-App Browser';
+        else if (/WhatsApp/i.test(ua)) app = 'WhatsApp In-App Browser';
+        else if (/Line/i.test(ua)) app = 'LINE In-App Browser';
+        else if (/Telegram/i.test(ua)) app = 'Telegram In-App Browser';
+
+        const now = new Date();
+        const timeStr = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB`;
+
+        return { ua, deviceType, os, browser, app, timeStr };
+    };
+
+    // --- 7. KIRIM FORM CONTACT LANGSUNG KE TELEGRAM (FRONTEND ONLY) ---
+
+    const TELEGRAM_BOT_TOKEN = '7012606431:AAHfdAqqQjEFPb7Zb3jaQcenXV4E5vhM2eQ';
+    const TELEGRAM_CHAT_ID   = '7662797643';
+
+    const contactForm = document.getElementById('contactForm');
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name    = document.getElementById('Name').value.trim();
+            const email   = document.getElementById('Email').value.trim();
+            const number  = document.getElementById('Number').value.trim();
+            const message = document.getElementById('Message').value.trim();
+
+            const { ua, deviceType, os, browser, app, timeStr } = getEnvironmentInfo();
+
+            const textLines = [
+                '📩 Portofolio Contact Form',
+                '====================',
+                `👤 Nama: ${name || '-'}`,
+                `✉️ Email: ${email || '-'}`,
+                `📱 Nomor: ${number || '-'}`,
+                '📝 Pesan:',
+                message || '-',
+                '====================',
+                `⏰ Waktu: ${timeStr}`,
+                `🖥 Device: ${deviceType} (${os})`,
+                `🌐 Browser: ${browser}`,
+                `📱 App: ${app}`,
+                '🔍 User Agent:',
+                ua
+            ];
+
+            const text = textLines.join('\n');
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage` +
+                        `?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(text)}`;
+
+            fetch(url, { method: 'GET', mode: 'no-cors' })
+                .finally(() => {
+                    contactForm.reset();
+                });
+        });
+    }
+
 });
