@@ -354,7 +354,7 @@
             </select>
             <div class="tool-actions">
               <button class="btn" id="btnVccRun" type="button">
-                   Run <i class="fa-solid fa-play"></i>
+                Run <i class="fa-solid fa-play"></i>
               </button>
               <button class="btn-secondary" id="btnVccClear" type="button">
                 Clear
@@ -380,7 +380,7 @@
             <input type="text" id="nikNumber" placeholder="NIK 16 digit (contoh: 3578162403050002)" maxlength="16" />
             <div class="tool-actions">
               <button class="btn" id="btnNikRun" type="button">
-                   Run <i class="fa-solid fa-play"></i>
+                Run <i class="fa-solid fa-play"></i>
               </button>
               <button class="btn-secondary" id="btnNikClear" type="button">
                 Clear
@@ -390,6 +390,110 @@
           </div>
 
           <pre class="tool-result" id="nikResult"></pre>
+        </div>
+
+        <!-- 7) Search Mahasiswa -->
+        <div class="tool-card" id="toolMahasiswa">
+          <div class="tool-title">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <h3>Search Mahasiswa</h3>
+          </div>
+          <div class="tool-desc">
+            Cari data mahasiswa berdasarkan nama/NIM/universitas.
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="mahasiswaQuery" placeholder="Nama/NIM/Universitas" />
+            <div class="tool-actions">
+              <button class="btn" id="btnMahasiswaRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnMahasiswaClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="mahasiswaStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="mahasiswaResult"></pre>
+        </div>
+
+        <!-- 8) IP Location -->
+        <div class="tool-card" id="toolIplocation">
+          <div class="tool-title">
+            <i class="fa-solid fa-location-dot"></i>
+            <h3>IP Location</h3>
+          </div>
+          <div class="tool-desc">
+            Cek lokasi berdasarkan IP address (geolocation).
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="iplocationIp" placeholder="IP Address (contoh: 8.8.8.8)" />
+            <div class="tool-actions">
+              <button class="btn" id="btnIplocationRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnIplocationClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="iplocationStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="iplocationResult"></pre>
+        </div>
+
+        <!-- 9) Web to ZIP -->
+        <div class="tool-card" id="toolWeb2zip">
+          <div class="tool-title">
+            <i class="fa-solid fa-file-zipper"></i>
+            <h3>Web to ZIP</h3>
+          </div>
+          <div class="tool-desc">
+            Download website sebagai file ZIP (static content).
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="web2zipUrl" placeholder="URL website (contoh: https://example.com)" />
+            <div class="tool-actions">
+              <button class="btn" id="btnWeb2zipRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnWeb2zipClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="web2zipStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="web2zipResult"></pre>
+        </div>
+
+        <!-- 10) Cek Pajak Jabar -->
+        <div class="tool-card" id="toolPajak">
+          <div class="tool-title">
+            <i class="fa-solid fa-car"></i>
+            <h3>Cek Pajak Jabar</h3>
+          </div>
+          <div class="tool-desc">
+            Cek pajak kendaraan bermotor Jawa Barat berdasarkan plat nomor.
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="pajakPlat" placeholder="Plat nomor (contoh: D1234ABC)" />
+            <div class="tool-actions">
+              <button class="btn" id="btnPajakRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnPajakClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="pajakStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="pajakResult"></pre>
         </div>
 
       </div>
