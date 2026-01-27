@@ -1,43 +1,58 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Tools page only
-  const isToolsPage = window.location.pathname.endsWith('tools.html') || document.getElementById('toolSubdomain');
+  // Tools page only guard
+  const isToolsPage =
+    window.location.pathname.endsWith('tools.html') ||
+    document.getElementById('toolSubdomain') ||
+    document.querySelector('.tools-page');
+
   if (!isToolsPage) return;
 
   // ==========================
-  //  Obfuscation helpers
-  //  (Bukan security, hanya "umpetin" dari tampilan source)
+  // PROXY BASE (SEMUA VIA WORKER)
   // ==========================
-  const b64 = (s) => btoa(unescape(encodeURIComponent(s)));
-  const unb64 = (s) => decodeURIComponent(escape(atob(s)));
+  const PROXY_BASE = "https://tools-api.rindraabi.my.id/api";
 
-  // Endpoint disimpan base64
-  // Kamu bisa ganti/gabung sesuai kebutuhan
   const API = {
-    subdomain: unb64("aHR0cHM6Ly9hcGkubmVrb2xhYnMud2ViLmlkL3Rvb2xzL2ZpbmRlci9zdWJkb21haW4tZmluZGVy"),
-    hosting:   unb64("aHR0cHM6Ly9hcGkucnl6dW1pLnZpcC9hcGkvdG9vbC9jaGVjay1ob3N0aW5n"),
-    portscan:  unb64("aHR0cHM6Ly9hcGkuZ2ltaXRhLmlkL2FwaS90b29scy9wb3J0c2Nhbg=="),
-    whois:     unb64("aHR0cHM6Ly9hcGkuZ2ltaXRhLmlkL2FwaS90b29scy93aG9pcw=="),
+    subdomain: `${PROXY_BASE}/subdomain`,
+    hosting:   `${PROXY_BASE}/hosting`,
+    portscan:  `${PROXY_BASE}/portscan`,
+    whois:     `${PROXY_BASE}/whois`,
   };
 
-  const setStatus = (el, msg) => { if (el) el.textContent = msg || ''; };
+  // ==========================
+  // Helpers UI
+  // ==========================
+  const setStatus = (el, msg) => {
+    if (!el) return;
+    el.textContent = msg || '';
+  };
+
   const showResult = (preEl, data) => {
     if (!preEl) return;
     preEl.style.display = 'block';
-    preEl.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    preEl.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
   };
+
   const clearResult = (preEl, statusEl) => {
-    if (preEl) { preEl.textContent = ''; preEl.style.display = 'none'; }
+    if (preEl) {
+      preEl.textContent = '';
+      preEl.style.display = 'none';
+    }
     setStatus(statusEl, '');
   };
 
   const safeFetchJSON = async (url, statusEl) => {
     setStatus(statusEl, 'Loading...');
     try {
-      const res = await fetch(url, { method: 'GET', headers: { 'accept': 'application/json' } });
-      const text = await res.text();
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { 'accept': 'application/json' },
+      });
 
+      const text = await res.text();
       let json;
-      try { json = JSON.parse(text); } catch { json = { raw: text }; }
+      try { json = JSON.parse(text); }
+      catch { json = { raw: text }; }
 
       if (!res.ok) {
         setStatus(statusEl, `Error ${res.status}`);
@@ -53,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ==========================
-  //  1) Subdomain Finder
+  // 1) Subdomain Finder
   // ==========================
-  const subDomain = document.getElementById('subdomainDomain');
-  const subRun = document.getElementById('btnSubdomainRun');
-  const subClear = document.getElementById('btnSubdomainClear');
-  const subStatus = document.getElementById('subdomainStatus');
-  const subResult = document.getElementById('subdomainResult');
+  const subDomain  = document.getElementById('subdomainDomain');
+  const subRun     = document.getElementById('btnSubdomainRun');
+  const subClear   = document.getElementById('btnSubdomainClear');
+  const subStatus  = document.getElementById('subdomainStatus');
+  const subResult  = document.getElementById('subdomainResult');
 
   subRun?.addEventListener('click', async () => {
     const domain = (subDomain?.value || '').trim();
@@ -68,20 +83,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = `${API.subdomain}?domain=${encodeURIComponent(domain)}`;
     const out = await safeFetchJSON(url, subStatus);
 
-    // Optional: rapihin output jadi list unik name_value + common_name
-    if (out.ok && out.data && out.data.result && Array.isArray(out.data.result)) {
+    // Kalau sukses dan format sesuai contoh (result array), rapihin jadi list subdomain unik
+    if (out.ok && out.data && Array.isArray(out.data.result)) {
       const uniq = new Set();
-      out.data.result.forEach(r => {
+
+      out.data.result.forEach((r) => {
         if (r?.name_value) {
-          // name_value kadang multi-line
-          String(r.name_value).split('\n').forEach(x => {
+          String(r.name_value).split('\n').forEach((x) => {
             const v = x.trim();
             if (v) uniq.add(v);
           });
-        } else if (r?.common_name) {
-          uniq.add(String(r.common_name).trim());
+        }
+        if (r?.common_name) {
+          const cn = String(r.common_name).trim();
+          if (cn) uniq.add(cn);
         }
       });
+
       showResult(subResult, {
         success: out.data.success ?? true,
         domain,
@@ -89,12 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
         subdomains: Array.from(uniq).sort(),
         meta: {
           timestamp: out.data.timestamp,
-          responseTime: out.data.responseTime
-        }
+          responseTime: out.data.responseTime,
+        },
       });
       return;
     }
 
+    // fallback tampilkan apa adanya
     showResult(subResult, out.data);
   });
 
@@ -104,11 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================
-  //  2) Check Hosting
+  // 2) Check Hosting
   // ==========================
   const hostingDomain = document.getElementById('hostingDomain');
-  const hostingRun = document.getElementById('btnHostingRun');
-  const hostingClear = document.getElementById('btnHostingClear');
+  const hostingRun    = document.getElementById('btnHostingRun');
+  const hostingClear  = document.getElementById('btnHostingClear');
   const hostingStatus = document.getElementById('hostingStatus');
   const hostingResult = document.getElementById('hostingResult');
 
@@ -127,13 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================
-  //  3) Port Scanner
+  // 3) Port Scanner
   // ==========================
-  const portscanHost = document.getElementById('portscanHost');
-  const portscanPorts = document.getElementById('portscanPorts');
-  const portscanType = document.getElementById('portscanType');
-  const portscanRun = document.getElementById('btnPortscanRun');
-  const portscanClear = document.getElementById('btnPortscanClear');
+  const portscanHost   = document.getElementById('portscanHost');
+  const portscanPorts  = document.getElementById('portscanPorts');
+  const portscanType   = document.getElementById('portscanType');
+  const portscanRun    = document.getElementById('btnPortscanRun');
+  const portscanClear  = document.getElementById('btnPortscanClear');
   const portscanStatus = document.getElementById('portscanStatus');
   const portscanResult = document.getElementById('portscanResult');
 
@@ -161,11 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================
-  //  4) WHOIS
+  // 4) WHOIS
   // ==========================
   const whoisDomain = document.getElementById('whoisDomain');
-  const whoisRun = document.getElementById('btnWhoisRun');
-  const whoisClear = document.getElementById('btnWhoisClear');
+  const whoisRun    = document.getElementById('btnWhoisRun');
+  const whoisClear  = document.getElementById('btnWhoisClear');
   const whoisStatus = document.getElementById('whoisStatus');
   const whoisResult = document.getElementById('whoisResult');
 
