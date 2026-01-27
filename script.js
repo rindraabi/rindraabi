@@ -31,26 +31,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-// --- 4. Active Link Highlighter on Scroll ---
+// --- 4. Active Link Highlighter on Scroll (SAFE for multi-page) ---
 const sections = document.querySelectorAll('section');
 
 window.addEventListener('scroll', () => {
+    // Hanya jalankan highlighter kalau halaman ini punya section dengan id (biasanya index.html)
+    if (!sections || sections.length === 0) return;
+
     let current = '';
     sections.forEach(section => {
+        const id = section.getAttribute('id');
+        if (!id) return;
+
         const sectionTop = section.offsetTop;
         const sectionHeight = section.clientHeight;
-        if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
-            current = section.getAttribute('id');
+        if (window.pageYOffset >= (sectionTop - sectionHeight / 3)) {
+            current = id;
         }
     });
 
+    // Hanya aktifkan untuk link yang mengarah ke anchor (#id) atau (index.html#id)
     links.forEach(link => {
+        const href = (link.getAttribute('href') || '').trim();
         link.classList.remove('active');
-        if (link.getAttribute('href').includes(current)) {
+
+        if (!current) return;
+
+        // Match "#about" atau "index.html#about"
+        if (href === `#${current}` || href.endsWith(`#${current}`)) {
             link.classList.add('active');
         }
     });
 });
+
 
 
     // --- 5. Lanyard DRAG, SWING & STRETCH PHYSICS ---
@@ -235,4 +248,5 @@ window.addEventListener('scroll', () => {
     }
 
 });
+
 
