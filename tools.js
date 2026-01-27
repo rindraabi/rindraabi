@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     whois:     `${PROXY_BASE}/whois`,
     vcc:       `${PROXY_BASE}/vcc`,
     nik:       `${PROXY_BASE}/nik`,
+    mahasiswa: `${PROXY_BASE}/mahasiswa`,
+    iplocation: `${PROXY_BASE}/iplocation`,
+    web2zip:   `${PROXY_BASE}/web2zip`,
+    pajak:     `${PROXY_BASE}/cekpajak/jabar`,
   };
 
   // ==========================
@@ -32,13 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const showResult = (preEl, data) => {
     if (!preEl) return;
     preEl.style.display = 'block';
-    preEl.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
+    if (typeof data === 'string') {
+      preEl.textContent = data;
+    } else if (data instanceof HTMLElement) {
+      preEl.innerHTML = '';
+      preEl.appendChild(data);
+    } else {
+      preEl.textContent = JSON.stringify(data, null, 2);
+    }
   };
 
   const clearResult = (preEl, statusEl) => {
     if (preEl) {
       preEl.textContent = '';
       preEl.style.display = 'none';
+      preEl.innerHTML = '';
     }
     setStatus(statusEl, '');
   };
@@ -401,4 +413,179 @@ document.addEventListener('DOMContentLoaded', () => {
     if (value.length > 16) value = value.substring(0, 16);
     e.target.value = value;
   });
+
+  // ==========================
+  // 7) Search Mahasiswa
+  // ==========================
+  const mahasiswaQuery = document.getElementById('mahasiswaQuery');
+  const mahasiswaRun   = document.getElementById('btnMahasiswaRun');
+  const mahasiswaClear = document.getElementById('btnMahasiswaClear');
+  const mahasiswaStatus = document.getElementById('mahasiswaStatus');
+  const mahasiswaResult = document.getElementById('mahasiswaResult');
+
+  mahasiswaRun?.addEventListener('click', async () => {
+    const query = (mahasiswaQuery?.value || '').trim();
+    if (!query) return setStatus(mahasiswaStatus, 'Isi query dulu');
+
+    const url = `${API.mahasiswa}?query=${encodeURIComponent(query)}`;
+    const out = await safeFetchJSON(url, mahasiswaStatus);
+    showResult(mahasiswaResult, out.data);
+  });
+
+  mahasiswaClear?.addEventListener('click', () => {
+    if (mahasiswaQuery) mahasiswaQuery.value = '';
+    clearResult(mahasiswaResult, mahasiswaStatus);
+  });
+
+  // ==========================
+  // 8) IP Location
+  // ==========================
+  const iplocationIp = document.getElementById('iplocationIp');
+  const iplocationRun = document.getElementById('btnIplocationRun');
+  const iplocationClear = document.getElementById('btnIplocationClear');
+  const iplocationStatus = document.getElementById('iplocationStatus');
+  const iplocationResult = document.getElementById('iplocationResult');
+
+  iplocationRun?.addEventListener('click', async () => {
+    const ip = (iplocationIp?.value || '').trim();
+    if (!ip) return setStatus(iplocationStatus, 'Isi IP dulu');
+
+    // Validasi IP format sederhana
+    const ipPattern = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipPattern.test(ip)) {
+      return setStatus(iplocationStatus, 'Format IP tidak valid');
+    }
+
+    const url = `${API.iplocation}?ip=${encodeURIComponent(ip)}`;
+    const out = await safeFetchJSON(url, iplocationStatus);
+    
+    // Format output untuk IP location
+    if (out.ok && out.data) {
+      const data = out.data;
+      if (data.success || data.ip) {
+        const formatted = {
+          'IP Address': data.ip || ip,
+          'Kota': data.city || 'N/A',
+          'Wilayah': data.region || 'N/A',
+          'Negara': data.country || 'N/A',
+          'Kode Negara': data.country_code || 'N/A',
+          'Koordinat': data.loc ? `${data.loc}` : 'N/A',
+          'Zona Waktu': data.timezone || 'N/A',
+          'ISP/Provider': data.org || 'N/A',
+          'Hostname': data.hostname || 'N/A',
+        };
+        showResult(iplocationResult, formatted);
+      } else {
+        showResult(iplocationResult, out.data);
+      }
+    } else {
+      showResult(iplocationResult, out.data);
+    }
+  });
+
+  iplocationClear?.addEventListener('click', () => {
+    if (iplocationIp) iplocationIp.value = '';
+    clearResult(iplocationResult, iplocationStatus);
+  });
+
+  // ==========================
+  // 9) Web to ZIP
+  // ==========================
+  const web2zipUrl = document.getElementById('web2zipUrl');
+  const web2zipRun = document.getElementById('btnWeb2zipRun');
+  const web2zipClear = document.getElementById('btnWeb2zipClear');
+  const web2zipStatus = document.getElementById('web2zipStatus');
+  const web2zipResult = document.getElementById('web2zipResult');
+
+  web2zipRun?.addEventListener('click', async () => {
+    const urlInput = (web2zipUrl?.value || '').trim();
+    if (!urlInput) return setStatus(web2zipStatus, 'Isi URL dulu');
+
+    // Validasi URL sederhana
+    try {
+      new URL(urlInput);
+    } catch {
+      return setStatus(web2zipStatus, 'URL tidak valid');
+    }
+
+    const url = `${API.web2zip}?url=${encodeURIComponent(urlInput)}`;
+    const out = await safeFetchJSON(url, web2zipStatus);
+    
+    // Jika response berisi link download
+    if (out.ok && out.data) {
+      if (out.data.download_url || out.data.zip_url) {
+        const downloadUrl = out.data.download_url || out.data.zip_url;
+        const downloadBtn = document.createElement('div');
+        downloadBtn.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #a855f7; margin-bottom: 15px;">Website berhasil dikonversi ke ZIP!</p>
+            <a href="${downloadUrl}" target="_blank" class="btn" style="display: inline-flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-download"></i> Download ZIP
+            </a>
+            <p style="margin-top: 10px; color: #94a3b8; font-size: 12px;">
+              Size: ${out.data.size || 'Unknown'} | Files: ${out.data.file_count || 'Unknown'}
+            </p>
+          </div>
+        `;
+        showResult(web2zipResult, downloadBtn);
+      } else {
+        showResult(web2zipResult, out.data);
+      }
+    } else {
+      showResult(web2zipResult, out.data);
+    }
+  });
+
+  web2zipClear?.addEventListener('click', () => {
+    if (web2zipUrl) web2zipUrl.value = '';
+    clearResult(web2zipResult, web2zipStatus);
+  });
+
+  // ==========================
+  // 10) Cek Pajak Jabar
+  // ==========================
+  const pajakPlat = document.getElementById('pajakPlat');
+  const pajakRun = document.getElementById('btnPajakRun');
+  const pajakClear = document.getElementById('btnPajakClear');
+  const pajakStatus = document.getElementById('pajakStatus');
+  const pajakResult = document.getElementById('pajakResult');
+
+  pajakRun?.addEventListener('click', async () => {
+    const plat = (pajakPlat?.value || '').trim().toUpperCase();
+    if (!plat) return setStatus(pajakStatus, 'Isi plat nomor dulu');
+
+    const url = `${API.pajak}?plat=${encodeURIComponent(plat)}`;
+    const out = await safeFetchJSON(url, pajakStatus);
+    
+    // Format output untuk cek pajak
+    if (out.ok && out.data) {
+      if (out.data.success || out.data.nomor_polisi) {
+        const data = out.data;
+        const formatted = {
+          'Nomor Polisi': data.nomor_polisi || plat,
+          'Nama Pemilik': data.nama_pemilik || 'N/A',
+          'Alamat': data.alamat || 'N/A',
+          'Merk/Type': data.merk_type || 'N/A',
+          'Tahun Pembuatan': data.tahun_pembuatan || 'N/A',
+          'Warna': data.warna || 'N/A',
+          'Status Pajak': data.status_pajak || 'N/A',
+          'Tenggat Pajak': data.tenggat_pajak || 'N/A',
+          'Jumlah Pajak': data.jumlah_pajak || 'N/A',
+          'Denda': data.denda || '0',
+          'Total Bayar': data.total_bayar || 'N/A',
+        };
+        showResult(pajakResult, formatted);
+      } else {
+        showResult(pajakResult, out.data);
+      }
+    } else {
+      showResult(pajakResult, out.data);
+    }
+  });
+
+  pajakClear?.addEventListener('click', () => {
+    if (pajakPlat) pajakPlat.value = '';
+    clearResult(pajakResult, pajakStatus);
+  });
+
 });
