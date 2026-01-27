@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     hosting:   `${PROXY_BASE}/hosting`,
     portscan:  `${PROXY_BASE}/portscan`,
     whois:     `${PROXY_BASE}/whois`,
+    vcc:       `${PROXY_BASE}/vcc`,
+    nik:       `${PROXY_BASE}/nik`,
   };
 
   // ==========================
@@ -83,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = `${API.subdomain}?domain=${encodeURIComponent(domain)}`;
     const out = await safeFetchJSON(url, subStatus);
 
-    // Kalau sukses dan format sesuai contoh (result array), rapihin jadi list subdomain unik
     if (out.ok && out.data && Array.isArray(out.data.result)) {
       const uniq = new Set();
 
@@ -113,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // fallback tampilkan apa adanya
     showResult(subResult, out.data);
   });
 
@@ -200,5 +200,205 @@ document.addEventListener('DOMContentLoaded', () => {
   whoisClear?.addEventListener('click', () => {
     if (whoisDomain) whoisDomain.value = '';
     clearResult(whoisResult, whoisStatus);
+  });
+
+  // ==========================
+  // 5) VCC Generator
+  // ==========================
+  const vccType    = document.getElementById('vccType');
+  const vccRun     = document.getElementById('btnVccRun');
+  const vccClear   = document.getElementById('btnVccClear');
+  const vccStatus  = document.getElementById('vccStatus');
+  const vccResult  = document.getElementById('vccResult');
+
+  vccRun?.addEventListener('click', async () => {
+    const type = (vccType?.value || 'visa').trim().toLowerCase();
+    const url = `${API.vcc}?type=${encodeURIComponent(type)}`;
+    
+    setStatus(vccStatus, 'Generating...');
+    
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate VCC');
+      }
+      
+      if (data.success && Array.isArray(data.result)) {
+        renderVccCards(data.result, type);
+        setStatus(vccStatus, `Generated ${data.result.length} ${type.toUpperCase()} cards`);
+      } else {
+        vccResult.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        vccResult.style.display = 'block';
+        setStatus(vccStatus, 'Done');
+      }
+    } catch (error) {
+      vccResult.innerHTML = `<div style="color: #ef4444;">Error: ${error.message}</div>`;
+      vccResult.style.display = 'block';
+      setStatus(vccStatus, 'Failed');
+    }
+  });
+
+  vccClear?.addEventListener('click', () => {
+    vccResult.innerHTML = '';
+    vccResult.style.display = 'none';
+    setStatus(vccStatus, '');
+  });
+
+  function renderVccCards(cards, type) {
+    let html = '<div class="vcc-grid">';
+    
+    cards.forEach((card, index) => {
+      html += `
+        <div class="vcc-card">
+          <h4>${card.type || type.toUpperCase()} #${index + 1}</h4>
+          <div class="vcc-field">
+            <span>Name:</span>
+            <span>${card.name || 'N/A'}</span>
+          </div>
+          <div class="vcc-field">
+            <span>Number:</span>
+            <span>${formatCardNumber(card.number)}</span>
+          </div>
+          <div class="vcc-field">
+            <span>CVV:</span>
+            <span>${card.cvv || 'N/A'}</span>
+          </div>
+          <div class="vcc-field">
+            <span>Expiry:</span>
+            <span>${card.expiry || 'N/A'}</span>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    
+    // Add download buttons
+    html += `
+      <div class="download-buttons">
+        <button class="btn-secondary" onclick="downloadVccAsJSON()">
+          <i class="fa-solid fa-download"></i> Download JSON
+        </button>
+        <button class="btn-secondary" onclick="downloadVccAsTXT()">
+          <i class="fa-solid fa-file-lines"></i> Download TXT
+        </button>
+      </div>
+    `;
+    
+    vccResult.innerHTML = html;
+    vccResult.style.display = 'block';
+    
+    // Store cards globally for download
+    window.currentVccCards = cards;
+  }
+
+  function formatCardNumber(number) {
+    if (!number) return 'N/A';
+    const clean = number.replace(/\s/g, '');
+    return clean.replace(/(\d{4})/g, '$1 ').trim();
+  }
+
+  // Global functions for download
+  window.downloadVccAsJSON = function() {
+    if (!window.currentVccCards || !window.currentVccCards.length) return;
+    
+    const dataStr = JSON.stringify(window.currentVccCards, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `vcc_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  window.downloadVccAsTXT = function() {
+    if (!window.currentVccCards || !window.currentVccCards.length) return;
+    
+    let txt = 'Virtual Credit Card List\n';
+    txt += 'Generated: ' + new Date().toLocaleString() + '\n';
+    txt += '='.repeat(50) + '\n\n';
+    
+    window.currentVccCards.forEach((card, index) => {
+      txt += `Card #${index + 1}\n`;
+      txt += `Type: ${card.type}\n`;
+      txt += `Name: ${card.name}\n`;
+      txt += `Number: ${card.number}\n`;
+      txt += `CVV: ${card.cvv}\n`;
+      txt += `Expiry: ${card.expiry}\n`;
+      txt += '-'.repeat(30) + '\n';
+    });
+    
+    const dataBlob = new Blob([txt], { type: 'text/plain' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `vcc_${new Date().toISOString().slice(0,10)}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // ==========================
+  // 6) NIK Checker
+  // ==========================
+  const nikNumber = document.getElementById('nikNumber');
+  const nikRun    = document.getElementById('btnNikRun');
+  const nikClear  = document.getElementById('btnNikClear');
+  const nikStatus = document.getElementById('nikStatus');
+  const nikResult = document.getElementById('nikResult');
+
+  nikRun?.addEventListener('click', async () => {
+    const nik = (nikNumber?.value || '').trim();
+    if (!nik) return setStatus(nikStatus, 'Isi NIK dulu');
+    if (!/^\d{16}$/.test(nik)) return setStatus(nikStatus, 'NIK harus 16 digit angka');
+
+    const url = `${API.nik}?nik=${encodeURIComponent(nik)}`;
+    const out = await safeFetchJSON(url, nikStatus);
+    
+    // Format output untuk NIK checker
+    if (out.ok && out.data && out.data.status === 'success') {
+      const data = out.data;
+      const formatted = {
+        NIK: data.nik,
+        Valid: data.valid ? '✅ Valid' : '❌ Invalid',
+        Message: data.message,
+        'Data Informasi': {
+          'Provinsi': data.data?.nama_provinsi || 'N/A',
+          'Kode Provinsi': data.data?.kode_provinsi || 'N/A',
+          'Pulau': data.data?.pulau || 'N/A',
+          'Zona Waktu': data.data?.zona_waktu || 'N/A',
+          'Tanggal Lahir': data.data?.tanggal_lahir || 'N/A',
+          'Jenis Kelamin': data.data?.jenis_kelamin || 'N/A',
+          'Usia': data.data?.usia_lengkap ? 
+            `${data.data.usia_lengkap.tahun} tahun ${data.data.usia_lengkap.bulan} bulan ${data.data.usia_lengkap.hari} hari` : 'N/A',
+          'Kategori Usia': data.data?.kategori_usia || 'N/A',
+          'Zodiak': data.data?.zodiak?.nama || 'N/A',
+          'Shio': data.data?.shio?.nama || 'N/A',
+          'Weton': data.data?.weton ? 
+            `${data.data.weton.hari} ${data.data.weton.pasaran}` : 'N/A',
+        }
+      };
+      showResult(nikResult, formatted);
+    } else {
+      showResult(nikResult, out.data);
+    }
+  });
+
+  nikClear?.addEventListener('click', () => {
+    if (nikNumber) nikNumber.value = '';
+    clearResult(nikResult, nikStatus);
+  });
+
+  // Auto-format NIK input
+  nikNumber?.addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 16) value = value.substring(0, 16);
+    e.target.value = value;
   });
 });
