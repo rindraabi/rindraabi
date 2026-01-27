@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tools | Rindra Abi Darmawansyah</title>
+
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://rindraabi.my.id/tools.html" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* Tools page tweaks (tetap nyatu dengan style existing) */
+    .tools-page {
+      min-height: 100vh;
+      padding: 120px 10% 100px 10%;
+      background: radial-gradient(circle at 80% 20%, #2e1065 0%, #0a0a0a 60%);
+      position: relative;
+      overflow: hidden;
+    }
+    .tools-wrap {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .tools-head {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .tools-head h1 {
+      font-size: 46px;
+      color: #a855f7;
+      text-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+      margin-bottom: 8px;
+    }
+    .tools-head p {
+      color: #cbd5e1;
+      line-height: 1.7;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+      margin-top: 30px;
+    }
+    .tool-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 18px;
+      padding: 22px;
+      transition: all 0.3s ease;
+    }
+    .tool-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 12px 35px rgba(168, 85, 247, 0.15);
+    }
+    .tool-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .tool-title i {
+      font-size: 22px;
+      color: #a855f7;
+      background: rgba(168, 85, 247, 0.12);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tool-title h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #fff;
+    }
+    .tool-desc {
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .tool-form {
+      display: grid;
+      gap: 10px;
+    }
+    .tool-form input, .tool-form select {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #fff;
+      outline: none;
+    }
+    .tool-form input:focus, .tool-form select:focus {
+      border-color: #a855f7;
+      background: rgba(168, 85, 247, 0.06);
+    }
+    .tool-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .tool-actions .btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+    }
+    .btn-secondary {
+      padding: 12px 18px;
+      border-radius: 12px;
+      background: transparent;
+      border: 1px solid rgba(168, 85, 247, 0.6);
+      color: #fff;
+      cursor: pointer;
+      transition: 0.25s;
+      font-weight: 600;
+    }
+    .btn-secondary:hover {
+      background: rgba(168, 85, 247, 0.15);
+      transform: translateY(-2px);
+    }
+    .tool-result {
+      margin-top: 14px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(168, 85, 247, 0.18);
+      border-radius: 14px;
+      padding: 12px;
+      max-height: 260px;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      display: none;
+    }
+    .tool-status {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-left: auto;
+    }
+
+    @media screen and (max-width: 768px) {
+      .tools-page { padding: 110px 5% 80px 5%; }
+      .tools-head h1 { font-size: 34px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER sama -->
+  <header>
+    <div class="logo">TungTungSahur <i class="fas fa-star"></i></div>
+
+    <div class="menu-toggle">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index.html#home">Home</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#skill">Skill</a></li>
+      <li><a href="index.html#experience">Experience</a></li>
+      <li><a href="tools.html" class="active">Tools</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </header>
+
+  <section class="tools-page">
+    <div class="tools-wrap">
+      <div class="tools-head">
+        <h1>Tools <i class="fa-solid fa-screwdriver-wrench"></i></h1>
+        <p>
+          Kumpulan tools berbasis API untuk kebutuhan network & domain checking.
+          Masukkan target, lalu klik <b>Run</b> untuk melihat hasilnya.
+        </p>
+      </div>
+
+      <div class="tools-grid">
+
+        <!-- 1) Subdomain Finder -->
+        <div class="tool-card" id="toolSubdomain">
+          <div class="tool-title">
+            <i class="fa-solid fa-diagram-project"></i>
+            <h3>Subdomain Finder</h3>
+          </div>
+          <div class="tool-desc">
+            Cari subdomain berdasarkan data sertifikat (CT logs). Output berupa list hasil.
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="subdomainDomain" placeholder="domain.tld (contoh: lambda.net.id)" />
+            <div class="tool-actions">
+              <button class="btn" id="btnSubdomainRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnSubdomainClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="subdomainStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="subdomainResult"></pre>
+        </div>
+
+        <!-- 2) Check Hosting -->
+        <div class="tool-card" id="toolHosting">
+          <div class="tool-title">
+            <i class="fa-solid fa-server"></i>
+            <h3>Check Hosting</h3>
+          </div>
+          <div class="tool-desc">
+            Cek web IP/provider, nameserver, mail route (jika tersedia dari API).
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="hostingDomain" placeholder="domain.tld (contoh: lambda.net.id)" />
+            <div class="tool-actions">
+              <button class="btn" id="btnHostingRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnHostingClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="hostingStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="hostingResult"></pre>
+        </div>
+
+        <!-- 3) Port Scanner -->
+        <div class="tool-card" id="toolPortscan">
+          <div class="tool-title">
+            <i class="fa-solid fa-network-wired"></i>
+            <h3>Port Scanner (Nmap)</h3>
+          </div>
+          <div class="tool-desc">
+            Scan port target host/IP. Pilih range ports dan tipe scan.
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="portscanHost" placeholder="host / IP (contoh: 103.105.57.20)" />
+            <input type="text" id="portscanPorts" placeholder="ports (contoh: top100 / 1-1000 / 22,80,443)" value="top100" />
+            <select id="portscanType">
+              <option value="quick">quick</option>
+              <option value="full">full</option>
+            </select>
+
+            <div class="tool-actions">
+              <button class="btn" id="btnPortscanRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnPortscanClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="portscanStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="portscanResult"></pre>
+        </div>
+
+        <!-- 4) WHOIS -->
+        <div class="tool-card" id="toolWhois">
+          <div class="tool-title">
+            <i class="fa-solid fa-id-card"></i>
+            <h3>WHOIS Lookup</h3>
+          </div>
+          <div class="tool-desc">
+            Lookup WHOIS domain/IP (output raw dan parsed).
+          </div>
+
+          <div class="tool-form">
+            <input type="text" id="whoisDomain" placeholder="domain / IP (contoh: lambda.net.id)" />
+            <div class="tool-actions">
+              <button class="btn" id="btnWhoisRun" type="button">
+                Run <i class="fa-solid fa-play"></i>
+              </button>
+              <button class="btn-secondary" id="btnWhoisClear" type="button">
+                Clear
+              </button>
+              <span class="tool-status" id="whoisStatus"></span>
+            </div>
+          </div>
+
+          <pre class="tool-result" id="whoisResult"></pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer sama -->
+  <footer>
+    <p>&copy; 2025 <span>Rindra Abi Darmawansyah</span>. All Rights Reserved.</p>
+    <div class="footer-social">
+      <a href="https://github.com/rindraabi"><i class="fab fa-github"></i></a>
+      <a href="https://www.instagram.com/aweecxc/"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-linkedin-in"></i></a>
+    </div>
+  </footer>
+
+  <div class="background-animation" id="bgAnimation"></div>
+
+  <!-- Pakai script.js yang sama -->
+  <script src="script.js"></script>
+
+  <!-- Tambahan JS khusus tools -->
+  <script src="tools.js"></script>
+</body>
+</html>
