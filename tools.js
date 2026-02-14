@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     whois: `https://api.gimita.id/api/tools/whois`,
 
     // Mahasiswa (Ryzumi)
-    mahasiswa: `https://api.ryzumi.vip/api/search/mahasiswa`,
+    mahasiswa: `https://api.ryzumi.net/api/search/mahasiswa`,
 
     // IP Location (Ryzumi)
     iplocation: `https://api.ryzumi.vip/api/tool/iplocation`,
